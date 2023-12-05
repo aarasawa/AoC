@@ -22,10 +22,23 @@ What is the sum of all the calibration values?
 import re
 
 #clean and organize data
-data = open('trebuchet_input.txt').read().strip().split("\n")
+data = open('trebuchet_input.txt').read().strip()
+
+#create an integer representation for numeric words in the strings
+data = (
+    data.replace('one', 'one1one')
+    .replace('two', 'two2two')
+    .replace('three', 'three3three')
+    .replace('four', 'four4four')
+    .replace('five', 'five5five')
+    .replace('six', 'six6six')
+    .replace('seven', 'seven7seven')
+    .replace('eight', 'eight8eight')
+    .replace('nine', 'nine9nine'))
 
 #regex for finding digits using list comprehension
-dg = [re.findall("\d", x) for x in data]
+dg = data.split("\n")
+dg = [re.findall("\d", x) for x in dg]
 
 #sum of first and last digits for strings
 final_txt = "The sum of all the calibration values is {}"
