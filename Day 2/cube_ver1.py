@@ -28,6 +28,10 @@ Determine which games would have been possible if the bag had been loaded with o
 """
 import re
 
+red_cubes = 12
+green_cubes = 13
+blue_cubes = 14
+
 game_id_total = 0
 red_total = 0
 green_total = 0
@@ -36,27 +40,45 @@ blue_total = 0
 with open('cube_input.txt') as f:
     data = f.read().strip().split('\n')
 
-def parse_newdata_then_dictize(input):
+def init_and_rezero_counters():
+    global red_total
+    red_total = 0
+    global green_total
+    green_total = 0
+    global blue_total
+    blue_total = 0
+
+def color_total_adder(color, num):
+    if color == 'red':
+        global red_total
+        red_total = red_total + num
+    if color == 'green':
+        global green_total 
+        green_total = green_total + num
+    if color == 'blue':
+        global blue_total
+        blue_total = blue_total + num
+
+def total_comparison_and_game_id_sum(num):
+    print(red_total, green_total, blue_total)
+    if (red_total <= red_cubes) and (green_total <= green_cubes) and (blue_total <= blue_cubes):
+        global game_id_total
+        game_id_total = game_id_total + num
+
+def main(input):
+    init_and_rezero_counters()
     game_num = input[0]
     for chance in input[1:]:
         times_rolled, color_rolled = chance.strip().split(' ')
-        if color_rolled == 'red':
-            red_total = red_total + times_rolled
-        elif color_rolled == 'green':
-            green_total = green_total + times_rolled
-        elif color_rolled = 'blue':
-            blue_total = blue_total + times_rolled
-    color_total_comparison(game_id_total,red_total, green_total, blue_total)
-
-        
-        
-#print(det)
+        color_total_adder(color_rolled, int(times_rolled))
+        #print(red_total, green_total, blue_total)
+    total_comparison_and_game_id_sum(int(game_num))
+    print(game_id_total)
 
 for x in data:
     fi = re.sub('Game ', '', x)
     si = re.split(': |, |;', fi)
+    print(si)
     #everything is now split into 'num color' format
     #func is being fed by row
-    parse_newdata_then_dictize(si)
-
-#result = parse_newdata_then_dictize(dat)
+    main(si)
