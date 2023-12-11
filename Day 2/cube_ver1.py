@@ -27,58 +27,20 @@ Determine which games would have been possible if the bag had been loaded with o
 12 red cubes, 13 green cubes, and 14 blue cubes. What is the sum of the IDs of those games?
 """
 import re
-
-red_cubes = 12
-green_cubes = 13
-blue_cubes = 14
+from collections import defaultdict
 
 game_id_total = 0
-red_total = 0
-green_total = 0
-blue_total = 0
 
 with open('cube_input.txt') as f:
     data = f.read().strip().split('\n')
 
-def init_and_rezero_counters():
-    global red_total
-    red_total = 0
-    global green_total
-    green_total = 0
-    global blue_total
-    blue_total = 0
-
-def color_total_adder(color, num):
-    if color == 'red':
-        global red_total
-        red_total = red_total + num
-    if color == 'green':
-        global green_total 
-        green_total = green_total + num
-    if color == 'blue':
-        global blue_total
-        blue_total = blue_total + num
-
-def total_comparison_and_game_id_sum(num):
-    print(red_total, green_total, blue_total)
-    if (red_total <= red_cubes) and (green_total <= green_cubes) and (blue_total <= blue_cubes):
-        global game_id_total
-        game_id_total = game_id_total + num
-
-def main(input):
-    init_and_rezero_counters()
-    game_num = input[0]
-    for chance in input[1:]:
-        times_rolled, color_rolled = chance.strip().split(' ')
-        color_total_adder(color_rolled, int(times_rolled))
-        #print(red_total, green_total, blue_total)
-    total_comparison_and_game_id_sum(int(game_num))
-    print(game_id_total)
-
 for x in data:
-    fi = re.sub('Game ', '', x)
-    si = re.split(': |, |;', fi)
-    print(si)
-    #everything is now split into 'num color' format
-    #func is being fed by row
-    main(si)
+    l = re.sub('[:;,]', '', x).split()
+    print(l)
+    colors_index = defaultdict(int)
+    for rolls, color in zip(l[2::2], l[3::2]):
+        colors_index[color] = max(colors_index[color], int(rolls))
+    if colors_index["red"] <= 12 and colors_index['green'] <= 13 and colors_index['blue'] <= 14:
+        game_id_total += int(l[1])
+
+print(game_id_total)
