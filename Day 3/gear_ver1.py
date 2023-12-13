@@ -25,3 +25,27 @@ Of course, the actual engine schematic is much larger. What is the sum of all of
 in the engine schematic?
 """
 
+import re
+import math as m
+
+gears = list(open('gear_input.txt'))
+
+# get the locations for symbols in the schematics
+syms = {(x, y): [] for x in range(140) for y in range(140) if gears[x][y] not in '0123456789.'}
+
+# feed in schematic data by row and enumerate with row numbers
+for r_num, row in enumerate(gears):
+
+    # find numbers in the row using regex
+    for digit in re.finditer(r'\d+', row):
+
+        # create a dictionary of coordinates that surround the digits in the schematic
+        digit_borders = {(i, j) for i in (r_num-1, r_num, r_num+1) for j in range(digit.start()-1, digit.end()+1)}
+
+        # record symbols found around a schematic value into the symbol dictionary
+        for coords in digit_borders & syms.keys():
+            #print(digit_borders & syms.keys())
+            syms[coords].append(int(digit.group()))
+
+print(sum(sum(item) for item in syms.values()))
+print(sum(m.prod(item) for item in syms.values() if len(item) == 2))
