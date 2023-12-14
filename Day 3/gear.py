@@ -44,7 +44,6 @@ for r_num, row in enumerate(gears):
 
         # record symbols found around a schematic value into the symbol dictionary
         for coords in digit_borders & syms.keys():
-            #print(digit_borders & syms.keys())
             syms[coords].append(int(digit.group()))
 
 print(sum(sum(item) for item in syms.values()))
