@@ -60,7 +60,6 @@ for row in dat:
     shared = wins & check 
     if not shared:
         continue
-    print(shared)
     
     # current card number
     card_num = int(re.sub(':', '', wl[1]))
