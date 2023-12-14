@@ -62,12 +62,12 @@ for row in dat:
         continue
     print(shared)
     
-    #current card number
+    # current card number
     card_num = int(re.sub(':', '', wl[1]))
+    
+    # multiplier for the number of subsequent cards we will get
+    multiplier = cards[card_num]
     
     # iterate over len(shared) cards and increment their count
     for i in range(len(shared)):
-        cards[card_num + 1 + i] += 1
-        print('cards index: ', card_num + 1 + i, ' ', 'cards value: ', cards[card_num + 1 + i])
-
-print(cards)
+        cards[card_num + 1 + i] += multiplier
