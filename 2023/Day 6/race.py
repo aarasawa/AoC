@@ -39,18 +39,29 @@ What do you get if you multiply these numbers together?
 """
 
 import re
+import math as m
 
 with open('race_input.txt') as f:
-    df = f.read().strip().split('\n')
+    dat = f.read().strip()
 
-timeList = [x for x in df[0].split(' ') if x != '']
-distList = [x for x in df[1].split(' ') if x != '']
+print(dat.split('\n'))
 
-tempList = zip(timeList, distList)
+races = list(zip(*(map(int, re.findall(r'(\d+)', x)) for x in dat.split('\n'))))
 
-def test_distance(tup):
-    get0 = tup[0]
-    get1 = tup[1]
-    print(list(get0, get1))
+def bin_search(time, dist, left = True):
+    lo, hi = 0, time
+    while lo <= hi:
+        mid = lo + (hi - lo >> 1)
+        if mid * (time - mid) > dist:
+            if left: hi = mid - 1
+            else: lo = mid + 1
+        else:
+            if left: lo = mid + 1
+            else: hi = mid - 1
+    return lo if left else hi
 
-print(test_distance(s) for s in tempList)
+def num_winners(time, dist):
+    return bin_search(time, dist, False) - bin_search(time, dist) + 1
+
+print(m.prod(num_winners(t, d) for t, d in races))
+print(num_winners(*(int("".join(str(x) for x in race)) for race in zip(*races))))
