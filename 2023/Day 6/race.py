@@ -1,4 +1,9 @@
 """
+help taken from:
+
+https://github.com/michaeljgallagher/Advent-of-Code/blob/master/2023/06.py
+
+
 Time:      7  15   30
 Distance:  9  40  200
 
