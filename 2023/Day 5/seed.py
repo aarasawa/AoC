@@ -31,6 +31,8 @@ def lookup(inputs, mapping):
 
 print(*[min(reduce(lookup, mappings, s))[0] for s in [
     
+    #zip for part 1 seed number and range of 1
     zip(seeds, [1] * len(seeds)),
+
     #zip for part 2 start and end range of seed numbers
     zip(seeds[0::2], seeds[1::2])]])
