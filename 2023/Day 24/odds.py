@@ -74,101 +74,120 @@ Disregard the Z axis entirely.
 Considering only the X and Y axes, check all pairs of hailstones' future paths for intersections. How many of these 
 intersections occur within the test area?
 
-reference: https://github.com/mebeim/aoc/blob/master/2023/solutions/day24.py
+reference: https://www.reddit.com/r/adventofcode/comments/18pnycy/comment/keqf8uq/
 """
 
-import sys
-from collections import defaultdict, deque
+import itertools as it
 
-def neighbors(grid, r, c, ignore_slopes):
-	cell = grid[r][c]
+InputList = []
+with open("odds.txt", "r") as data:
+    for t in data:
+        P, V = t.strip().split(" @ ")
+        PX, PY, PZ = list(map(int, P.split(", ")))
+        VX, VY, VZ = list(map(int, V.split(", ")))
+        NewTuple = (PX, PY, PZ, VX, VY, VZ)
+        InputList.append(NewTuple)
 
-	if ignore_slopes or cell == '.':
-		for r, c in ((r + 1, c), (r - 1, c), (r, c + 1), (r, c - 1)):
-			if grid[r][c] != '#':
-				yield r, c
-	elif cell == 'v': yield (r + 1, c)
-	elif cell == '^': yield (r - 1, c)
-	elif cell == '>': yield (r, c + 1)
-	elif cell == '<': yield (r, c - 1)
+#PX1 + VX1*t = PX2 + VX2*t
+#PX1 - PX2 = VX2*t - VX1*t
+#(PX1-PX2)/(VX2-VX1) = t
 
-def num_neighbors(grid, r, c, ignore_slopes):
-	if ignore_slopes or grid[r][c] == '.':
-		return sum(grid[r][c] != '#' for r, c in ((r + 1, c), (r - 1, c), (r, c + 1), (r, c - 1)))
-	return 1
-
-def is_node(grid, rc, src, dst, ignore_slopes):
-	return rc == src or rc == dst or num_neighbors(grid, *rc, ignore_slopes) > 2
-
-def adjacent_nodes(grid, rc, src, dst, ignore_slopes):
-	q = deque([(rc, 0)])
-	seen = set()
-
-	while q:
-		rc, dist = q.popleft()
-		seen.add(rc)
-
-		for n in neighbors(grid, *rc, ignore_slopes):
-			if n in seen:
-				continue
-
-			if is_node(grid, n, src, dst, ignore_slopes):
-				yield (n, dist + 1)
-				continue
-
-			q.append((n, dist + 1))
-
-def graph_from_grid(grid, src, dst, ignore_slopes=False):
-	g = defaultdict(list)
-	q = deque([src])
-	seen = set()
-
-	while q:
-		rc = q.popleft()
-		if rc in seen:
-			continue
-
-		seen.add(rc)
-
-		for n, weight in adjacent_nodes(grid, rc, src, dst, ignore_slopes):
-			g[rc].append((n, weight))
-			q.append(n)
-
-	return g
-
-def longest_path(g, cur, dst, distance=0, seen=set()):
-	if cur == dst:
-		return distance
-
-	best = 0
-	seen.add(cur)
-
-	for neighbor, weight in g[cur]:
-		if neighbor in seen:
-			continue
-
-		best = max(best, longest_path(g, neighbor, dst, distance + weight))
-
-	seen.remove(cur)
-	return best
+#y = mx + b
+#m = avy/avx
+#b = apy - m*apx
+#m1x + b1 = m2x + b2
+#m1x - m2x = b2 - b1
+#x = (b2-b1)/(m1-m2)
+#200000000000000
+#400000000000000
+        
+NumHails = len(InputList)
+Part1Answer = 0
+NumCombos = 0
+Min = 200000000000000
+Max = 400000000000000
+InputList.sort()
+for A, B in it.combinations(InputList, 2):
+    NumCombos += 1
+    APX, APY, APZ, AVX, AVY, AVZ = A
+    BPX, BPY, BPZ, BVX, BVY, BVZ = B
+    MA = (AVY/AVX)
+    MB = (BVY/BVX)
+    CA = APY - (MA*APX)
+    CB = BPY - (MB*BPX)
+    if MA == MB:
+        continue
+    XPos = (CB-CA)/(MA-MB)
+    YPos = MA*XPos + CA
+    if (XPos < APX and AVX > 0) or (XPos > APX and AVX < 0) or (XPos < BPX and BVX > 0) or (XPos > BPX and BVX < 0):
+        continue
+    if Min <= XPos <= Max and Min <= YPos <= Max:
+        Part1Answer += 1
 
 
-# Open the first argument as input or use stdin if no arguments were given
-fin = open(sys.argv[1], 'r') if len(sys.argv) > 1 else sys.stdin
 
-grid = list(map(list, fin.read().splitlines()))
-height, width = len(grid), len(grid[0])
 
-grid[0][1] = '#'
-grid[height - 1][width - 2] = '#'
+PotentialXSet = None
+PotentialYSet = None
+PotentialZSet = None
+for A, B in it.combinations(InputList, 2):
+    APX, APY, APZ, AVX, AVY, AVZ = A
+    BPX, BPY, BPZ, BVX, BVY, BVZ = B
 
-src = (1, 1)
-dst = (height - 2, width - 2)
+    if AVX == BVX and abs(AVX) > 100:
+        NewXSet = set()
+        Difference = BPX - APX
+        for v in range(-1000, 1000):
+            if v == AVX:
+                continue
+            if Difference % (v-AVX) == 0:
+                NewXSet.add(v)
+        if PotentialXSet != None:
+            PotentialXSet = PotentialXSet & NewXSet
+        else:
+            PotentialXSet = NewXSet.copy()
+    if AVY == BVY and abs(AVY) > 100:
+        NewYSet = set()
+        Difference = BPY - APY
+        for v in range(-1000, 1000):
+            if v == AVY:
+                continue
+            if Difference % (v-AVY) == 0:
+                NewYSet.add(v)
+        if PotentialYSet != None:
+            PotentialYSet = PotentialYSet & NewYSet
+        else:
+            PotentialYSet = NewYSet.copy()
+    if AVZ == BVZ and abs(AVZ) > 100:
+        NewZSet = set()
+        Difference = BPZ - APZ
+        for v in range(-1000, 1000):
+            if v == AVZ:
+                continue
+            if Difference % (v-AVZ) == 0:
+                NewZSet.add(v)
+        if PotentialZSet != None:
+            PotentialZSet = PotentialZSet & NewZSet
+        else:
+            PotentialZSet = NewZSet.copy()
 
-g = graph_from_grid(grid, src, dst)
-pathlen = longest_path(g, src, dst) + 2
-print('Part 1:', pathlen)
+print(PotentialXSet, PotentialYSet, PotentialZSet)
+RVX, RVY, RVZ = PotentialXSet.pop(), PotentialYSet.pop(), PotentialZSet.pop()
 
-g = graph_from_grid(grid, src, dst, ignore_slopes=True)
-pathlen = longest_path(g, src, dst) + 2
-print('Part 2:', pathlen)
+APX, APY, APZ, AVX, AVY, AVZ = InputList[0]
+BPX, BPY, BPZ, BVX, BVY, BVZ = InputList[1]
+MA = (AVY-RVY)/(AVX-RVX)
+MB = (BVY-RVY)/(BVX-RVX)
+CA = APY - (MA*APX)
+CB = BPY - (MB*BPX)
+XPos = int((CB-CA)/(MA-MB))
+YPos = int(MA*XPos + CA)
+Time = (XPos - APX)//(AVX-RVX)
+ZPos = APZ + (AVZ - RVZ)*Time
+
+print(XPos, YPos, ZPos)
+Part2Answer = XPos + YPos + ZPos
+
+
+print(f"{Part1Answer = }")
+print(f"{Part2Answer = }")
